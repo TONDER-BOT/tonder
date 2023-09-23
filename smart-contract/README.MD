@@ -1,4 +1,4 @@
-# Zkore Smart Contract Documentation
+# Tonder Smart Contract Documentation
 
 ## Config
 
