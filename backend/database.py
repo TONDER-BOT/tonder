@@ -163,6 +163,8 @@ class Database:
             })
         print(ret)
         return ret
+# add try catch to avoid duplicate insert data
+# add jwt annotation to protect api
 
     def get_match(self, liker_id, likee_id):
         self.connect()

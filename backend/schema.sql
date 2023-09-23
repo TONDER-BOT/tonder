@@ -30,5 +30,6 @@ CREATE TABLE matching (
     like_matching_user BOOLEAN DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (liker_id) REFERENCES users (id),
-    FOREIGN KEY (likee_id) REFERENCES users (id)
+    FOREIGN KEY (likee_id) REFERENCES users (id),
+    UNIQUE (liker_id, likee_id)
 );
