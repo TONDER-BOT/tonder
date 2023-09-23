@@ -24,7 +24,7 @@ class Database:
         self.conn.close()
 
     def connect(self):
-        self.conn = sqlite3.connect('jdbc:sqlite:identifire.sqlite')
+        self.conn = sqlite3.connect('identifire.sqlite')
         self.conn.row_factory = sqlite3.Row
 
     def close(self):
@@ -36,17 +36,17 @@ class Database:
         password = user_data['password']
         display_name = user_data['display_name']
         wallet_address = user_data['wallet_address']
-        photo = user_data['photo'].read()
-        description = user_data['desc']
+        description = user_data['description']
         cursor = self.conn.cursor()
         try:
-            cursor.execute("INSERT INTO users (username, password, display_name, photo, wallet_address, description) VALUES (?, ?, ?, ?, ?, ?)",
-                           (username, password, display_name, photo, wallet_address, description))
-            self.conn.commit()
-            self.close()
+            cursor.execute("INSERT INTO users (username, password, display_name, wallet_address, description) VALUES (?, ?, ?, ?, ?)",
+                           (username, password, display_name, wallet_address, description))
+
             user_id = cursor.lastrowid
+            self.conn.commit()
             return user_id
         except:
+            self.close()
             return None
 
     def find_user(self, user_id):
@@ -57,9 +57,9 @@ class Database:
                     'id': result[0],
                     'username': result[1],
                     'display_name': result[3],
-                    'photo': result[4].decode('utf-8'),
-                    'wallet_address': result[5],
-                    'desc': result[6],
+                    'wallet_address': result[4],
+                    'desc': result[5],
+                    'telegram_id': result[6],
                 }
 
                 return user_data
@@ -90,9 +90,56 @@ class Database:
                 'id': result[0],
                 'username': result[1],
                 'display_name': result[3],
-                'photo': base64.b64encode(result[4]).decode('utf-8'),
-                'wallet_address': result[5],
-                'desc': result[6],
+                'wallet_address': result[4],
+                'desc': result[5],
             }
             ret.append(user_data)
+        self.close()
         return ret
+
+    def get_user_photos(self, user_id):
+        self.connect()
+        results = self.conn.execute(
+            "SELECT * FROM user_photo WHERE user_id = ?", (user_id,)).fetchall()
+        ret = []
+        for result in results:
+            user_photo_data = {
+                'id': result[0],
+                'user_id': result[1],
+                'photo_data': f'data:{result[3]};base64,{base64.b64encode(result[2]).decode("utf-8")}',
+            }
+            ret.append(user_photo_data)
+        self.close()
+        return ret
+
+    def add_user_photos(self, user_id, photo):
+        self.connect()
+        photo_data = photo.read()
+        photo_content_type = photo.content_type
+        cursor = self.conn.cursor()
+        cursor.execute("INSERT INTO user_photo (user_id, photo, content_type) VALUES (?, ?, ?)",
+                    (user_id, photo_data, photo_content_type))
+        user_photo_id = cursor.lastrowid
+        self.conn.commit()
+
+        return user_photo_id
+
+    def get_user_photo_by_id(self, user_id, user_photo_id):
+        self.connect()
+        result = self.conn.execute(
+            "SELECT * FROM user_photo WHERE id = ? AND user_id = ?", (user_photo_id, user_id)).fetchone()
+        if not result:
+            return None
+        user_photo_data = {
+            'id': result[0],
+            'user_id': result[1],
+            'photo_data': f'data:{result[3]};base64,{base64.b64encode(result[2]).decode("utf-8")}',
+        }
+        return user_photo_data
+
+    def delete_user_photo(self, user_photo_id):
+        self.connect()
+        self.conn.execute("DELETE FROM user_photo WHERE id=?", (user_photo_id,))
+        self.conn.commit()
+
+
