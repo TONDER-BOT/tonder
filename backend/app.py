@@ -97,5 +97,21 @@ def delete_user_photo(user_id, photo_id):
     db.delete_user_photo(photo_id)
     return jsonify({'message': 'Photo deleted successfully!'}), 200
 
+
+@app.route('/<user_id>/candidates', methods=['GET'])
+def get_candidates(user_id):
+    candidates = db.get_candidates(user_id)
+    return jsonify({'candidates': candidates}), 200
+
+
+@app.route('/<user_id>/candidates/<likee_id>', methods=['POST'])
+def like_user(user_id, likee_id):
+    payload = request.json
+    prefer = payload['prefer']
+
+    result = db.rate_user(user_id, likee_id, prefer)
+    return jsonify({'message': 'User liked successfully!'}), 200
+
+
 if __name__ == '__main__':
     app.run(debug=True)

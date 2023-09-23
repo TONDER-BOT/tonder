@@ -118,7 +118,7 @@ class Database:
         photo_content_type = photo.content_type
         cursor = self.conn.cursor()
         cursor.execute("INSERT INTO user_photo (user_id, photo, content_type) VALUES (?, ?, ?)",
-                    (user_id, photo_data, photo_content_type))
+                       (user_id, photo_data, photo_content_type))
         user_photo_id = cursor.lastrowid
         self.conn.commit()
 
@@ -139,7 +139,48 @@ class Database:
 
     def delete_user_photo(self, user_photo_id):
         self.connect()
-        self.conn.execute("DELETE FROM user_photo WHERE id=?", (user_photo_id,))
+        self.conn.execute(
+            "DELETE FROM user_photo WHERE id=?", (user_photo_id,))
         self.conn.commit()
 
+    def get_candidates(self, user_id):
+        self.connect()
+        results = self.conn.execute("""
+            SELECT id, username, display_name, description, telegram_id
+            FROM users
+            WHERE id NOT IN (
+                SELECT likee_id FROM matching WHERE liker_id = ?
+            ) AND id != ?
+        """, (user_id, user_id)).fetchall()
+        ret = []
+        for result in results:
+            ret.append({
+                'id': result['id'],
+                'username': result['username'],
+                'display_name': result['display_name'],
+                'telegram_id': result['telegram_id'],
+                'description': result['description'],
+            })
+        print(ret)
+        return ret
 
+    def get_match(self, liker_id, likee_id):
+        self.connect()
+        result = self.conn.execute("""
+            SELECT like_matching_user FROM matching
+            WHERE liker_id = ? AND likee_id = ?
+        """, (liker_id, likee_id)).fetchone()
+        if not result or result['like_matching_user'] == 0:
+            return False
+        return True
+
+    def rate_user(self, liker_id, likee_id, prefer):
+        self.connect()
+        # write data in to db
+        self.conn.execute("INSERT INTO matching (liker_id, likee_id, like_matching_user) VALUES (?, ?, ?)",
+                          (liker_id, likee_id, prefer))
+        self.conn.commit()
+        # check if they like each other
+        if prefer and self.get_match(likee_id, liker_id):
+            return {"liker_id": liker_id, "likee_id": likee_id, "match": True}
+        return {"liker_id": liker_id, "likee_id": likee_id, "match": False}
