@@ -6,5 +6,6 @@ CREATE TABLE users (
     password TEXT NOT NULL,
     display_name TEXT NOT NULL,
     photo BLOB NOT NULL,
-    wallet_address TEXT NOT NULL
+    wallet_address TEXT NOT NULL,
+    description TEXT NOT NULL
 );

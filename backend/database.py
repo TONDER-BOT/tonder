@@ -6,24 +6,25 @@ class Database:
     def __init__(self):
         self.conn = None
 
-    def create_table():
-        conn = sqlite3.connect('database.db')
-        with conn.execute('''
+    def create_table(self):
+        self.connect()
+        with self.conn.execute('''
             DROP TABLE IF EXISTS users;
-            CREATE TABLE users
-            (id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT NOT NULL,
-            password TEXT NOT NULL,
-            display_name TEXT NOT NULL,
-            photo BLOB NOT NULL,
-            wallet_address TEXT NOT NULL,
-            UNIQUE(username));
+            CREATE TABLE users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                username TEXT NOT NULL,
+                password TEXT NOT NULL,
+                display_name TEXT NOT NULL,
+                photo BLOB NOT NULL,
+                wallet_address TEXT NOT NULL,
+                description TEXT NOT NULL
+            );
         '''):
-            conn.commit()
-        conn.close()
+            self.conn.commit()
+        self.conn.close()
 
     def connect(self):
-        self.conn = sqlite3.connect('database.db')
+        self.conn = sqlite3.connect('jdbc:sqlite:identifire.sqlite')
         self.conn.row_factory = sqlite3.Row
 
     def close(self):
@@ -36,10 +37,11 @@ class Database:
         display_name = user_data['display_name']
         wallet_address = user_data['wallet_address']
         photo = user_data['photo'].read()
+        description = user_data['desc']
         cursor = self.conn.cursor()
         try:
-            cursor.execute("INSERT INTO users (username, password, display_name, photo, wallet_address) VALUES (?, ?, ?, ?, ?)",
-                           (username, password, display_name, photo, wallet_address))
+            cursor.execute("INSERT INTO users (username, password, display_name, photo, wallet_address, description) VALUES (?, ?, ?, ?, ?, ?)",
+                           (username, password, display_name, photo, wallet_address, description))
             self.conn.commit()
             self.close()
             user_id = cursor.lastrowid
@@ -54,9 +56,10 @@ class Database:
                 user_data = {
                     'id': result[0],
                     'username': result[1],
-                    'display_name': result[2],
+                    'display_name': result[3],
                     'photo': result[4].decode('utf-8'),
                     'wallet_address': result[5],
+                    'desc': result[6],
                 }
 
                 return user_data
@@ -86,9 +89,10 @@ class Database:
             user_data = {
                 'id': result[0],
                 'username': result[1],
-                'display_name': result[2],
+                'display_name': result[3],
                 'photo': base64.b64encode(result[4]).decode('utf-8'),
                 'wallet_address': result[5],
+                'desc': result[6],
             }
             ret.append(user_data)
         return ret
