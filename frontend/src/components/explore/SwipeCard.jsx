@@ -1,11 +1,15 @@
-import { useAtomValue, useSetAtom } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 import React from "react";
-import { Button, Card, Col, Row } from "react-bootstrap";
+import { Button, Card, Col, Row, Spinner } from "react-bootstrap";
 import { exploreAtom } from "../../model";
+import PropTypes from "prop-types";
 
-const SwipeCard = () => {
+const SwipeCard = (props) => {
+  const { onMatch } = props;
+
   const swipeCard = useAtomValue(exploreAtom.swipeCard);
-  const setLoading = useSetAtom(exploreAtom.loading);
+  const [liking, setLiking] = useAtom(exploreAtom.liking);
+  const [loading, setLoading] = useAtom(exploreAtom.loading);
 
   const handleUnlike = async () => {
     console.log("unlike");
@@ -16,13 +20,14 @@ const SwipeCard = () => {
 
   const handleLike = async () => {
     console.log("like");
-    setLoading(true);
+    setLiking(true);
     await new Promise((resolve) => setTimeout(resolve, 600));
-    setLoading(false);
+    onMatch();
+    setLiking(false);
   };
 
   return (
-    <Card style={{ width: "18rem" }}>
+    <Card className="w-100">
       <Card.Img variant="top" src={swipeCard.imgURL} />
       <Card.Body>
         <Card.Title>{swipeCard.name}</Card.Title>
@@ -34,6 +39,7 @@ const SwipeCard = () => {
               variant="light"
               style={{ borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
               onClick={handleUnlike}
+              disabled={liking || loading}
             >
               🚫 Unlike
             </Button>
@@ -44,14 +50,29 @@ const SwipeCard = () => {
               variant="primary"
               style={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
               onClick={handleLike}
+              disabled={liking || loading}
             >
-              😍 Like
+              {liking ? (
+                <Spinner
+                  as="span"
+                  animation="border"
+                  size="sm"
+                  role="status"
+                  aria-hidden="true"
+                />
+              ) : (
+                "😍 Like"
+              )}
             </Button>
           </Col>
         </Row>
       </Card.Body>
     </Card>
   );
+};
+
+SwipeCard.propTypes = {
+  onMatch: PropTypes.func.isRequired,
 };
 
 export default SwipeCard;

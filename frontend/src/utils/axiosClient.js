@@ -1,7 +1,7 @@
-import axios from 'axios';
+import axios from "axios";
 
 const client = axios.create({
-  baseURL: 'https://ethp.onrender.com',
+  baseURL: "http://localhost:8080",
 });
 
 export default client;

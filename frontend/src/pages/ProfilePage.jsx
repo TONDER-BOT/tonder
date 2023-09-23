@@ -1,5 +1,10 @@
 import React from "react";
+import profile from "../components/profile";
 
 export const ProfilePage = () => {
-  return <>Profile Page</>;
+  return (
+    <>
+      <profile.ProfileContainer />
+    </>
+  );
 };
