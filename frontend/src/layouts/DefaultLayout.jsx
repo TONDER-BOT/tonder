@@ -1,6 +1,7 @@
 import React from "react";
 import { Container, Image, Nav, Navbar } from "react-bootstrap";
 import { LinkContainer } from "react-router-bootstrap";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { Link } from "react-router-dom";
 
 export const DefaultLayout = ({ children }) => {
@@ -18,8 +19,9 @@ export const DefaultLayout = ({ children }) => {
               <Nav.Link href="/login">Login</Nav.Link>
             </LinkContainer>
           </Nav>
-          <Nav>
-            <div className="py-1">
+          <Nav className="align-items-center">
+            <ConnectButton />
+            <div className="ms-3 py-1">
               <span className="me-3">User Name</span>
               <Link to="/profile">
                 <Image
@@ -29,8 +31,6 @@ export const DefaultLayout = ({ children }) => {
                 />
               </Link>
             </div>
-            {/* <div>124</div> */}
-            {/* <ConnectButton /> */}
           </Nav>
         </Container>
       </Navbar>
