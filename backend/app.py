@@ -1,22 +1,31 @@
+import base64
+
+import dotenv
+import os
+from flask_jwt_extended import JWTManager, create_access_token
 from flask import Flask, request, jsonify
 from database import Database
 
 app = Flask(__name__)
+jwt = JWTManager()
 db = Database()
+dotenv.load_dotenv()
+app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY')
+jwt.init_app(app)
 
 
 @app.route('/register', methods=['POST'])
 def register():
     username = request.form['username']
     password = request.form['password']
-    birthday = request.form['birthday']
-    gender = request.form['gender']
+    display_name = request.form['display_name']
+    wallet_address = request.form['wallet_address']
     photo = request.files['photo']
     user_data = {
         'username': username,
         'password': password,
-        'birthday': birthday,
-        'gender': gender,
+        'display_name': display_name,
+        'wallet_address': wallet_address,
         'photo': photo
     }
     user_id = db.insert_user(user_data)
@@ -34,7 +43,8 @@ def login():
     if not user_data:
         return jsonify({'message': 'Invalid username'})
     if user_data and user_data['password'] == password:
-        return jsonify({'user_id': user_data['id'], 'message': 'Login successful!'})
+        access_token = create_access_token(identity=username)
+        return jsonify({'user_id': user_data['id'], 'message': 'Login successful!', access_token: access_token})
     else:
         return jsonify({'message': 'Invalid username or password'})
 

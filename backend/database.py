@@ -1,4 +1,5 @@
 import sqlite3
+import base64
 
 
 class Database:
@@ -29,17 +30,18 @@ class Database:
         self.conn.close()
 
     def insert_user(self, user_data):
+        self.connect()
         username = user_data['username']
         password = user_data['password']
         display_name = user_data['display_name']
         wallet_address = user_data['wallet_address']
-        with open(user_data['photo'], 'rb') as f:
-            photo_binary = f.read()
+        photo = user_data['photo'].read()
         cursor = self.conn.cursor()
         try:
             cursor.execute("INSERT INTO users (username, password, display_name, photo, wallet_address) VALUES (?, ?, ?, ?, ?)",
-                           (username, password, display_name, wallet_address, photo_binary))
+                           (username, password, display_name, photo, wallet_address))
             self.conn.commit()
+            self.close()
             user_id = cursor.lastrowid
             return user_id
         except:
@@ -52,7 +54,7 @@ class Database:
                 user_data = {
                     'id': result[0],
                     'username': result[1],
-                    'display_name': result[3],
+                    'display_name': result[2],
                     'photo': result[4].decode('utf-8'),
                     'wallet_address': result[5],
                 }
@@ -84,8 +86,9 @@ class Database:
             user_data = {
                 'id': result[0],
                 'username': result[1],
-                'password': result[2],
-                'photo': result[5].decode('utf-8'),
+                'display_name': result[2],
+                'photo': base64.b64encode(result[4]).decode('utf-8'),
+                'wallet_address': result[5],
             }
             ret.append(user_data)
         return ret

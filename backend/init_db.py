@@ -1,7 +1,7 @@
 import sqlite3
 
 import base64
-connection = sqlite3.connect('database.db')
+connection = sqlite3.connect('jdbc:sqlite:identifire.sqlite')
 print(connection)
 
 with open('schema.sql') as f:
