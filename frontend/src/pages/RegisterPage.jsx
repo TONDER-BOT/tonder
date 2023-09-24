@@ -1,10 +1,10 @@
 import React from "react";
 import account from "../components/account";
 
-export const LoginPage = () => {
+export const RegisterPage = () => {
   return (
     <>
-      <account.LoginContainer />
+      <account.RegisterContainer />
     </>
   );
 };

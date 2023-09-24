@@ -1,11 +1,13 @@
-import React from "react";
+import React, { useState } from "react";
 import SwipeCard from "./SwipeCard";
 import { Spinner } from "react-bootstrap";
 import { useAtomValue } from "jotai";
 import { exploreAtom } from "../../model";
+import MatchModal from "./MatchModal";
 
 const SwipeCardContainer = () => {
   const loading = useAtomValue(exploreAtom.loading);
+  const [matchModalShow, setMatchModalShow] = useState(false);
 
   return (
     <>
@@ -14,8 +16,18 @@ const SwipeCardContainer = () => {
           <span className="visually-hidden">Loading...</span>
         </Spinner>
       ) : (
-        <SwipeCard />
+        <SwipeCard
+          onMatch={() => {
+            setMatchModalShow(true);
+          }}
+        />
       )}
+      <MatchModal
+        show={matchModalShow}
+        onClose={() => {
+          setMatchModalShow(false);
+        }}
+      />
     </>
   );
 };
