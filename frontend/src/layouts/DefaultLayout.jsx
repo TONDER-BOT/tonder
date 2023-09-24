@@ -18,9 +18,6 @@ export const DefaultLayout = ({ children }) => {
           <Navbar.Brand className="fw-bold" href="/">
             TONDER
           </Navbar.Brand>
-          <Nav className="me-auto">
-            <Nav.Link href="/login">Login</Nav.Link>
-          </Nav>
           <Navbar.Toggle aria-controls="navbar-nav" />
           <Navbar.Collapse id="navbar-nav" className="justify-content-end">
             <Nav className="align-items-center">
